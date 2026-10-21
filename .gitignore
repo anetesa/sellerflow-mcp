@@ -1,0 +1,11 @@
+.gradle/
+build/
+.kotlin/
+.idea/
+*.iml
+.DS_Store
+local.properties
+# local configuration and data: may hold secrets
+sellerflow.toml
+.sellerflow/
+*.db

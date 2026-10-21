@@ -1,0 +1,15 @@
+# Copy to sellerflow.toml (git-ignored) or point SELLERFLOW_CONFIG at it.
+# No secrets here: client secrets and API tokens are read only from environment variables
+# (SELLERFLOW_ALLEGRO_CLIENT_SECRET, SELLERFLOW_INPOST_API_TOKEN, SELLERFLOW_STORE_KEY).
+# The environment (sandbox or prod) is chosen only by SELLERFLOW_ENV; sandbox is the default.
+
+# Local database, tokens and downloaded labels
+data_dir = "~/.sellerflow"
+
+[allegro]
+# Client id of your app registered at apps.developer.allegro.pl (sandbox: apps.developer.allegro.pl.allegrosandbox.pl)
+client_id = ""
+
+[inpost]
+# ShipX organization id from the InPost parcel manager, API section
+organization_id = ""
