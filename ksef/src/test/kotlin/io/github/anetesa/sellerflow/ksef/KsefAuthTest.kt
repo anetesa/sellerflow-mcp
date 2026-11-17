@@ -46,14 +46,16 @@ class KsefAuthTest :
                         when {
                             path.endsWith("/auth/challenge") ->
                                 respond(
-                                    """{"challenge":"20261117-CR-38557B3000-EC7CEBBCE2-E8","timestamp":"2026-11-17T16:24:30Z","timestampMs":1794932670387}""",
+                                    """{"challenge":"20261117-CR-38557B3000-EC7CEBBCE2-E8","timestamp":"2026-11-17T16:24:30Z",
+                                       "timestampMs":1794932670387}""",
                                     HttpStatusCode.OK,
                                     JSON_TYPE,
                                 )
                             path.endsWith("/security/public-key-certificates") -> respond(certificates, HttpStatusCode.OK, JSON_TYPE)
                             path.endsWith("/auth/ksef-token") ->
                                 respond(
-                                    """{"referenceNumber":"20261117-AU-1","authenticationToken":{"token":"op-jwt","validUntil":"2026-11-17T17:00:00Z"}}""",
+                                    """{"referenceNumber":"20261117-AU-1",
+                                       "authenticationToken":{"token":"op-jwt","validUntil":"2026-11-17T17:00:00Z"}}""",
                                     HttpStatusCode.Accepted,
                                     JSON_TYPE,
                                 )
@@ -136,7 +138,8 @@ class KsefAuthTest :
 
         test("KSeF errors read as one line; tokens stay out of logs") {
             ksefErrorText(
-                """{"exception":{"exceptionDetailList":[{"exceptionCode":21405,"exceptionDescription":"Błąd walidacji","details":["NIP"]}]}}""",
+                """{"exception":{"exceptionDetailList":
+                   [{"exceptionCode":21405,"exceptionDescription":"Błąd walidacji","details":["NIP"]}]}}""",
             ) shouldBe
                 "21405 Błąd walidacji NIP"
             KsefTokens("secret-a", java.time.Instant.EPOCH, "secret-r", java.time.Instant.EPOCH).toString() shouldNotContain "secret"
