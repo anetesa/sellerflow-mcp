@@ -13,6 +13,7 @@ enum class Environment(
             allegroApi = "https://api.allegro.pl.allegrosandbox.pl",
             allegroAuth = "https://allegro.pl.allegrosandbox.pl/auth/oauth",
             inpostApi = "https://sandbox-api-shipx-pl.easypack24.net",
+            ksefApi = "https://api-test.ksef.mf.gov.pl/v2",
         ),
     ),
     PROD(
@@ -20,6 +21,7 @@ enum class Environment(
             allegroApi = "https://api.allegro.pl",
             allegroAuth = "https://allegro.pl/auth/oauth",
             inpostApi = "https://api-shipx-pl.easypack24.net",
+            ksefApi = "https://api.ksef.mf.gov.pl/v2",
         ),
     ),
     ;
@@ -35,9 +37,10 @@ enum class Environment(
     }
 }
 
-/** Base URLs of the services. KSeF ones are added with the KSeF client, after checking the official docs. */
+/** Base URLs of the services; the KSeF ones come from the Ministry of Finance's srodowiska.md (TEST and PROD). */
 data class Endpoints(
     val allegroApi: String,
     val allegroAuth: String,
     val inpostApi: String,
+    val ksefApi: String,
 )

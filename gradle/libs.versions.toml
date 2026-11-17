@@ -8,6 +8,9 @@ ktoml = "0.7.1"
 clikt = "5.1.0"
 slf4j = "2.0.17"
 sqlite = "3.54.1.0"
+# Test-only: XAdES signing and self-signed certificates for the KSeF TEST environment (versions of the official MF client)
+dss = "6.3"
+bouncycastle = "1.82"
 kotest = "6.2.6"
 detekt = "2.0.0-alpha.6"
 ktlint-gradle = "14.2.0"
@@ -26,6 +29,10 @@ mcp-client = { module = "io.modelcontextprotocol:kotlin-sdk-client", version.ref
 mcp-testing = { module = "io.modelcontextprotocol:kotlin-sdk-testing", version.ref = "mcp" }
 ktoml-core = { module = "com.akuleshov7:ktoml-core", version.ref = "ktoml" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+dss-xades = { module = "eu.europa.ec.joinup.sd-dss:dss-xades", version.ref = "dss" }
+dss-token = { module = "eu.europa.ec.joinup.sd-dss:dss-token", version.ref = "dss" }
+dss-utils = { module = "eu.europa.ec.joinup.sd-dss:dss-utils-apache-commons", version.ref = "dss" }
+bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }

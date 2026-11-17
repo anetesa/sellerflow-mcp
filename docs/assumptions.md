@@ -10,10 +10,10 @@ assume, why, and how to verify it. Update the entry when an assumption is confir
 | Allegro REST API | `https://api.allegro.pl.allegrosandbox.pl` | `https://api.allegro.pl` | developer.allegro.pl |
 | Allegro OAuth | `https://allegro.pl.allegrosandbox.pl/auth/oauth` | `https://allegro.pl/auth/oauth` | developer.allegro.pl |
 | InPost ShipX | `https://sandbox-api-shipx-pl.easypack24.net` | `https://api-shipx-pl.easypack24.net` | ShipX documentation (dokumentacja-inpost.atlassian.net) |
-| KSeF 2.0 | not set yet | not set yet | to be taken from the Ministry of Finance OpenAPI document in Phase 3 |
+| KSeF 2.0 | `https://api-test.ksef.mf.gov.pl/v2` (TEST) | `https://api.ksef.mf.gov.pl/v2` | CIRFMF/ksef-docs `srodowiska.md` and `open-api.json` (checked 2026-11-17) |
 
-Third-party sources disagree on the KSeF 2.0 test host (`ksef-test.mf.gov.pl` vs `api-test.ksef.mf.gov.pl`),
-so no KSeF URL is hard-coded until it is checked against the official OpenAPI specification.
+The sandbox maps to KSeF's TEST environment, which accepts self-signed certificates and shares its data between
+integrators (use random NIPs only). KSeF also has DEMO (pre-production); SellerFlow does not use it yet.
 
 ## A2. Production is opt-in through the environment only (Phase 0)
 
@@ -64,3 +64,19 @@ Checked against the sandbox on 2026-11-17 (organization 7281, locker KRA010):
   orders may not exist in the sandbox.
 - The label is `GET /v1/shipments/{id}/label?format=Pdf&type=A6` (or `normal` for A4); not yet seen succeeding,
   because the sandbox account has no funds. Verify it once the account is topped up or switched to invoice billing.
+
+## A7. KSeF 2.0 login (Phase 3)
+
+From CIRFMF/ksef-docs (`uwierzytelnianie.md`, `tokeny-ksef.md`, `open-api.json`) and the official ksef-client-java,
+checked against KSeF TEST on 2026-11-17:
+
+- SellerFlow logs in with a KSeF token, which a seller generates in the Ministry's taxpayer application. The string
+  `{token}|{challenge.timestampMs}` is encrypted with RSA-OAEP (SHA-256, MGF1-SHA-256) under the
+  `KsefTokenEncryption` key from `GET /security/public-key-certificates` and sent to `POST /auth/ksef-token` with that
+  key's `publicKeyId`.
+- The login is asynchronous: `GET /auth/{referenceNumber}` with the operation token answers code 100 while it is
+  checked and 200 when done; then `POST /auth/token/redeem` gives the access token (minutes) and the refresh token
+  (up to 7 days), and `POST /auth/token/refresh` renews the access token.
+- The first KSeF token can only be issued after a XAdES login. In TEST a self-signed certificate with
+  `serialNumber=TINPL-{NIP}` is accepted; the integration test signs with EU DSS (XAdES-BASELINE-B, enveloped), as
+  the official Java client does. DSS and BouncyCastle are test dependencies only.
