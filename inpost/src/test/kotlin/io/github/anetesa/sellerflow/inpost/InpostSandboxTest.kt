@@ -21,8 +21,9 @@ import io.ktor.client.engine.cio.CIO
 class InpostSandboxTest :
     FunSpec({
         tags(NamedTag("Integration"))
-
-        val shipments =
+        // Also off without credentials, so a plain build (CI) never tries the network even if the tag filter is not applied
+        val configured = System.getenv("SELLERFLOW_INPOST_API_TOKEN") != null
+        val shipments by lazy {
             InpostShipments(
                 (
                     InpostHttp.create(
@@ -33,8 +34,9 @@ class InpostSandboxTest :
                     ) as Outcome.Ok
                 ).value,
             )
+        }
 
-        test("finds a sandbox locker and rejects an unknown one") {
+        test("finds a sandbox locker and rejects an unknown one").config(enabled = configured) {
             shipments
                 .locker("KRA010")
                 .shouldBeInstanceOf<Outcome.Ok<ParcelLocker>>()
@@ -42,7 +44,7 @@ class InpostSandboxTest :
             shipments.locker("NOSUCH99").shouldBeInstanceOf<Outcome.Err>()
         }
 
-        test("creates a locker shipment; it is confirmed, or the reason is explained") {
+        test("creates a locker shipment; it is confirmed, or the reason is explained").config(enabled = configured) {
             val created =
                 shipments
                     .create(
