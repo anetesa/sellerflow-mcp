@@ -80,3 +80,18 @@ checked against KSeF TEST on 2026-11-17:
 - The first KSeF token can only be issued after a XAdES login. In TEST a self-signed certificate with
   `serialNumber=TINPL-{NIP}` is accepted; the integration test signs with EU DSS (XAdES-BASELINE-B, enveloped), as
   the official Java client does. DSS and BouncyCastle are test dependencies only.
+
+## A8. FA(3) invoices for marketplace orders (Phase 3)
+
+- Schema: the Ministry's `schemat_FA(3)_v1-0E.xsd` and base types, copied unchanged into
+  `invoice/src/main/resources/.../xsd` (CIRFMF/ksef-docs, commit d4460b6). The Ministry's own sample invoice
+  validates against the bundled copy. Large `maxOccurs` (1000 and more) are read as `unbounded`, because the JDK
+  validator otherwise runs out of its secure-processing limit and heap; the builder checks the 10000-line limit.
+- Allegro shows gross prices, so lines are gross (`P_9B`, `P_11A`) and each rate's VAT is computed from its gross
+  total, rounded half up (art. 106e ust. 7 of the VAT act), net = gross − VAT.
+- What the buyer paid above the goods is the delivery, invoiced as its own line ("Dostawa") at the goods' rate. One
+  rate for the whole order (23 % by default) until per-offer rates are configurable; confirm with the seller's
+  accountant before production use.
+- A buyer with a valid NIP is identified by it; a private person (or a NIP that fails its checksum) by `BrakID`.
+  `P_6`, the date of sale, is the order's date in Europe/Warsaw. JST and GV are always "2" (not a local government
+  unit, not a VAT group member).
