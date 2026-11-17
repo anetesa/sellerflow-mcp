@@ -1,5 +1,6 @@
 package io.github.anetesa.sellerflow.core.config
 
+import io.github.anetesa.sellerflow.core.model.SellerProfile
 import java.nio.file.Path
 
 /**
@@ -12,6 +13,8 @@ data class SellerFlowConfig(
     val dataDir: Path,
     val allegro: AllegroSettings,
     val inpost: InpostSettings,
+    /** Who issues the invoices; null until the [seller] section is filled in. */
+    val seller: SellerSettings? = null,
 ) {
     val endpoints: Endpoints get() = environment.endpoints
 }
@@ -31,6 +34,18 @@ data class InpostSettings(
     val organizationId: String?,
 )
 
+/**
+ * The seller as printed on invoices, and how invoices are numbered and taxed. The NIP is also the KSeF context
+ * SellerFlow logs in to.
+ */
+data class SellerSettings(
+    val profile: SellerProfile,
+    /** One VAT rate for the goods and the delivery (23 by default), until per-offer rates exist. */
+    val vatRate: Int,
+    /** Invoice numbers are `{prefix}/{n}/{MM}/{YYYY}`, counted per month. */
+    val invoicePrefix: String,
+)
+
 /** Secrets, read from the environment at the moment they are needed and never stored in config objects. */
 class Secrets(
     private val env: (String) -> String? = System::getenv,
@@ -39,6 +54,9 @@ class Secrets(
 
     fun inpostApiToken(): String? = env(INPOST_API_TOKEN)?.takeIf { it.isNotBlank() }
 
+    /** The KSeF token the seller generated in the Ministry's taxpayer application (contains "|"). */
+    fun ksefToken(): String? = env(KSEF_TOKEN)?.takeIf { it.isNotBlank() }
+
     /** Key that encrypts tokens kept in the local database. */
     fun storeKey(): String? = env(STORE_KEY)?.takeIf { it.isNotBlank() }
 
@@ -46,5 +64,6 @@ class Secrets(
         const val ALLEGRO_CLIENT_SECRET = "SELLERFLOW_ALLEGRO_CLIENT_SECRET"
         const val INPOST_API_TOKEN = "SELLERFLOW_INPOST_API_TOKEN"
         const val STORE_KEY = "SELLERFLOW_STORE_KEY"
+        const val KSEF_TOKEN = "SELLERFLOW_KSEF_TOKEN"
     }
 }

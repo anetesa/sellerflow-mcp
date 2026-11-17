@@ -11,10 +11,16 @@ import io.github.anetesa.sellerflow.core.store.CredentialStore
 import io.github.anetesa.sellerflow.core.store.InMemoryCredentialStore
 import io.github.anetesa.sellerflow.inpost.InpostHttp
 import io.github.anetesa.sellerflow.inpost.InpostShipments
+import io.github.anetesa.sellerflow.ksef.KsefAuth
+import io.github.anetesa.sellerflow.ksef.KsefHttp
+import io.github.anetesa.sellerflow.ksef.KsefInvoices
+import io.github.anetesa.sellerflow.ksef.KsefSession
 import io.github.anetesa.sellerflow.mcp.confirm.ConfirmTokens
 import io.github.anetesa.sellerflow.mcp.tools.AllegroTools
 import io.github.anetesa.sellerflow.mcp.tools.InpostTools
+import io.github.anetesa.sellerflow.mcp.tools.KsefTools
 import io.github.anetesa.sellerflow.storage.SqliteCredentialStore
+import io.github.anetesa.sellerflow.storage.SqliteInvoiceLedger
 import io.github.anetesa.sellerflow.storage.SqliteShipmentLedger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -85,4 +91,23 @@ internal class Wiring(
                     labelsDir = config.dataDir.resolve("labels"),
                 ) to ""
         }
+
+    /** The KSeF tool, or why it cannot work: it needs the [seller] section; the KSeF token is checked on first use. */
+    fun ksefTools(): Pair<KsefTools?, String> {
+        val seller =
+            config.seller ?: return null to "KSeF is not set up: fill in the [seller] section of sellerflow.toml (NIP, name, address)."
+        val http = KsefHttp(client, config.endpoints.ksefApi)
+        val auth = KsefAuth(http)
+        val database = config.dataDir.resolve("sellerflow.db")
+        return KsefTools(
+            seller = seller,
+            environment = config.environment,
+            orders = allegroOrders,
+            session = KsefSession(auth, store, seller.profile.nip, secrets.ksefToken()),
+            invoices = KsefInvoices(http, auth),
+            ledger = SqliteInvoiceLedger.open(database),
+            tokens = ConfirmTokens(),
+            upoDir = config.dataDir.resolve("upo"),
+        ) to ""
+    }
 }

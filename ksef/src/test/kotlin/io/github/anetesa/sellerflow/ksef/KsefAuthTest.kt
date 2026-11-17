@@ -136,6 +136,40 @@ class KsefAuthTest :
             requests.single().headers[HttpHeaders.Authorization] shouldBe "Bearer refresh-jwt"
         }
 
+        test("the session reuses a fresh access token, refreshes a stale one and logs in only without a usable refresh token") {
+            val (auth, requests) = ksef(ArrayDeque(listOf(status(200, "ok"))))
+            val store =
+                io.github.anetesa.sellerflow.core.store
+                    .InMemoryCredentialStore()
+            var now = java.time.Instant.parse("2026-11-17T16:30:00Z")
+            val clock =
+                object : java.time.Clock() {
+                    override fun getZone() = java.time.ZoneOffset.UTC
+
+                    override fun withZone(zone: java.time.ZoneId?) = this
+
+                    override fun instant() = now
+                }
+            val session = KsefSession(auth, store, NIP, "ksef-token-123", clock)
+            session.accessToken() shouldBe Outcome.Ok("access-jwt")
+            requests.count { it.url.encodedPath.endsWith("/auth/ksef-token") } shouldBe 1
+            session.accessToken() shouldBe Outcome.Ok("access-jwt")
+            requests.count { it.url.encodedPath.endsWith("/auth/token/refresh") } shouldBe 0
+            now = java.time.Instant.parse("2026-11-17T16:45:00Z")
+            session.accessToken() shouldBe Outcome.Ok("access-2")
+            requests.count { it.url.encodedPath.endsWith("/auth/ksef-token") } shouldBe 1
+            KsefSession(
+                auth,
+                io.github.anetesa.sellerflow.core.store
+                    .InMemoryCredentialStore(),
+                NIP,
+                null,
+                clock,
+            ).accessToken()
+                .shouldBeInstanceOf<Outcome.Err>()
+                .error.message shouldContain "SELLERFLOW_KSEF_TOKEN"
+        }
+
         test("KSeF errors read as one line; tokens stay out of logs") {
             ksefErrorText(
                 """{"exception":{"exceptionDetailList":

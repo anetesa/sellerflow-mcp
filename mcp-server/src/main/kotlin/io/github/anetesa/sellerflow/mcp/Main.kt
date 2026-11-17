@@ -45,7 +45,8 @@ private class Serve : CliktCommand(name = "serve") {
             val wiring = Wiring(config, client)
             val (allegro, allegroProblem) = wiring.allegroTools(this)
             val (inpost, inpostProblem) = wiring.inpostTools()
-            val server = SellerFlowServer.create(config, allegro, allegroProblem, inpost, inpostProblem)
+            val (ksef, ksefProblem) = wiring.ksefTools()
+            val server = SellerFlowServer.create(config, allegro, allegroProblem, inpost, inpostProblem, ksef, ksefProblem)
             val session = server.createSession(transport)
             val closed = CompletableDeferred<Unit>()
             session.onClose { closed.complete(Unit) }

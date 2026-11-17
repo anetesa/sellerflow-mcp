@@ -16,3 +16,17 @@ user_agent = ""
 [inpost]
 # ShipX organization id from the InPost parcel manager, API section
 organization_id = ""
+
+[seller]
+# Printed on invoices; the NIP is also the KSeF context SellerFlow logs in to. The KSeF token goes to the
+# SELLERFLOW_KSEF_TOKEN environment variable (generate it in the Ministry's taxpayer application).
+name = ""
+nip = ""
+street = ""
+post_code = ""
+city = ""
+# email = "sklep@example.com"
+# One VAT rate for goods and delivery: 23, 22, 8, 7 or 5
+vat_rate = 23
+# Invoice numbers: FV/1/11/2026, counted per month
+invoice_prefix = "FV"

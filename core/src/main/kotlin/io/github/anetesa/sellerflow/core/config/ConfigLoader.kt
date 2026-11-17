@@ -4,7 +4,11 @@ import com.akuleshov7.ktoml.Toml
 import com.akuleshov7.ktoml.TomlInputConfig
 import io.github.anetesa.sellerflow.core.Outcome
 import io.github.anetesa.sellerflow.core.SellerFlowError
+import io.github.anetesa.sellerflow.core.flatMap
 import io.github.anetesa.sellerflow.core.map
+import io.github.anetesa.sellerflow.core.model.Address
+import io.github.anetesa.sellerflow.core.model.Nip
+import io.github.anetesa.sellerflow.core.model.SellerProfile
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -26,7 +30,7 @@ class ConfigLoader(
         val environment =
             Environment.fromEnvValue(env(ENV))
                 ?: return error("$ENV must be 'sandbox' or 'prod', got '${env(ENV)}'")
-        return readFile().map { file ->
+        return readFile().flatMap { file -> seller(file.seller).map { seller -> file to seller } }.map { (file, seller) ->
             SellerFlowConfig(
                 environment = environment,
                 dataDir = expandHome(env(DATA_DIR) ?: file.dataDir ?: DEFAULT_DATA_DIR),
@@ -36,7 +40,38 @@ class ConfigLoader(
                         userAgent = env(ALLEGRO_USER_AGENT) ?: file.allegro.userAgent,
                     ),
                 inpost = InpostSettings(organizationId = env(INPOST_ORGANIZATION_ID) ?: file.inpost.organizationId),
+                seller = seller,
             )
+        }
+    }
+
+    /** The [seller] section, checked: a NIP with a valid checksum, an address, a VAT rate SellerFlow can invoice. */
+    private fun seller(section: SellerSection?): Outcome<SellerSettings?> {
+        if (section == null) return Outcome.Ok(null)
+        val nip = Nip.parse(section.nip)
+        val missing = listOf("name" to section.name, "street" to section.street, "post_code" to section.postCode, "city" to section.city)
+        return when {
+            nip == null -> error("[seller] nip '${section.nip}' is not a valid NIP (10 digits with a checksum).")
+            missing.any { it.second.isBlank() } ->
+                error(
+                    "[seller] needs ${missing.filter { it.second.isBlank() }.joinToString { it.first }}.",
+                )
+            section.vatRate !in SUPPORTED_RATES -> error("[seller] vat_rate must be one of $SUPPORTED_RATES.")
+            else ->
+                Outcome.Ok(
+                    SellerSettings(
+                        profile =
+                            SellerProfile(
+                                name = section.name,
+                                nip = nip,
+                                address = Address(section.street, section.postCode, section.city, section.countryCode),
+                                email = section.email,
+                                bankAccount = null,
+                            ),
+                        vatRate = section.vatRate,
+                        invoicePrefix = section.invoicePrefix,
+                    ),
+                )
         }
     }
 
@@ -76,6 +111,20 @@ class ConfigLoader(
         @SerialName("data_dir") val dataDir: String? = null,
         val allegro: AllegroSection = AllegroSection(),
         val inpost: InpostSection = InpostSection(),
+        val seller: SellerSection? = null,
+    )
+
+    @Serializable
+    private data class SellerSection(
+        val name: String = "",
+        val nip: String = "",
+        val street: String = "",
+        @SerialName("post_code") val postCode: String = "",
+        val city: String = "",
+        @SerialName("country_code") val countryCode: String = "PL",
+        val email: String? = null,
+        @SerialName("vat_rate") val vatRate: Int = DEFAULT_RATE,
+        @SerialName("invoice_prefix") val invoicePrefix: String = "FV",
     )
 
     @Serializable
@@ -97,6 +146,8 @@ class ConfigLoader(
         const val ALLEGRO_USER_AGENT = "SELLERFLOW_ALLEGRO_USER_AGENT"
         const val INPOST_ORGANIZATION_ID = "SELLERFLOW_INPOST_ORGANIZATION_ID"
         private const val DEFAULT_FILE = "sellerflow.toml"
+        private const val DEFAULT_RATE = 23
+        private val SUPPORTED_RATES = setOf(23, 22, 8, 7, 5)
         private const val DEFAULT_DATA_DIR = "~/.sellerflow"
         private val SECRET_KEY = Regex("""(?im)^\s*([a-z_]*(?:secret|token|password|api_key)[a-z_]*)\s*=""")
         private val TOML = Toml(inputConfig = TomlInputConfig(ignoreUnknownNames = false))

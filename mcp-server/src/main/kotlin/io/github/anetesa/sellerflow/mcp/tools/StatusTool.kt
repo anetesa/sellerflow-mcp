@@ -40,5 +40,13 @@ internal fun statusText(config: SellerFlowConfig): String =
                 },
         )
         appendLine("InPost: " + if (config.inpost.organizationId != null) "organization id set" else "not configured")
-        append("KSeF: not available yet")
+        append(
+            "KSeF: " +
+                when (val seller = config.seller) {
+                    null -> "not configured (fill in the [seller] section)"
+                    else ->
+                        "seller NIP ${seller.profile.nip}, " +
+                            if (config.environment == Environment.SANDBOX) "KSeF TEST" else "KSeF PRODUCTION (legally binding invoices)"
+                },
+        )
     }

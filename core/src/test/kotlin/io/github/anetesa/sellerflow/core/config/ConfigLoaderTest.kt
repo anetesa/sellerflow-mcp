@@ -53,6 +53,36 @@ class ConfigLoaderTest :
             loader(tempdir(), ConfigLoader.ENV to "production").load().shouldBeInstanceOf<Outcome.Err>()
         }
 
+        test("reads the seller and refuses an invalid NIP") {
+            val dir = tempdir()
+            File(dir, "sellerflow.toml").writeText(
+                """
+                [seller]
+                name = "Sklep Testowy"
+                nip = "525-267-47-98"
+                street = "ul. Babiego Lata 19A"
+                post_code = "53-024"
+                city = "Wrocław"
+                """.trimIndent(),
+            )
+            val seller =
+                loader(dir)
+                    .load()
+                    .shouldBeInstanceOf<Outcome.Ok<SellerFlowConfig>>()
+                    .value.seller!!
+            seller.profile.nip.value shouldBe "5252674798"
+            seller.vatRate shouldBe 23
+            seller.invoicePrefix shouldBe "FV"
+            File(
+                dir,
+                "sellerflow.toml",
+            ).writeText("[seller]\nname = \"X\"\nnip = \"1234567890\"\nstreet = \"a\"\npost_code = \"b\"\ncity = \"c\"\n")
+            loader(dir)
+                .load()
+                .shouldBeInstanceOf<Outcome.Err>()
+                .error.message shouldContain "not a valid NIP"
+        }
+
         test("refuses secrets in the file and says where they belong") {
             val dir = tempdir()
             File(dir, "sellerflow.toml").writeText("[allegro]\nclient_secret = \"x\"\n")
