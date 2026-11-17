@@ -10,8 +10,9 @@ fulfillment cycle of a Polish online seller:
 > "Process yesterday's paid Allegro orders: create InPost locker shipments, give me the labels, and issue
 > invoices in KSeF for the buyers who asked for one."
 
-> **Status: early development.** Phase 0 (project skeleton) is done; the Allegro, InPost and KSeF integrations
-> are being built phase by phase. Sandbox environments are the default.
+> **Status: early development.** Phase 0 (project skeleton) is done. Phase 1 (Allegro) is in progress: login with
+> the device flow and reading orders work against the sandbox. InPost and KSeF follow. Sandbox environments are the
+> default.
 
 ## Safety model
 
@@ -38,6 +39,13 @@ npx @modelcontextprotocol/inspector --cli mcp-server/build/install/sellerflow/bi
 ```
 
 Configuration: copy `sellerflow.example.toml` to `sellerflow.toml`; secrets go to environment variables.
+
+Log in to Allegro and list the orders waiting for shipment (needs `SELLERFLOW_ALLEGRO_CLIENT_ID`,
+`SELLERFLOW_ALLEGRO_CLIENT_SECRET` and `SELLERFLOW_ALLEGRO_USER_AGENT`; tokens are kept in memory for now):
+
+```bash
+mcp-server/build/install/sellerflow/bin/sellerflow allegro-login
+```
 
 ## Modules
 

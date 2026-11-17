@@ -14,7 +14,7 @@ import kotlinx.io.asSink
 import kotlinx.io.buffered
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) = Cli().subcommands(Serve()).main(args)
+fun main(args: Array<String>) = Cli().subcommands(Serve(), AllegroLogin()).main(args)
 
 private class Cli : CliktCommand(name = "sellerflow") {
     override fun help(context: Context) = "Allegro → InPost → KSeF fulfillment for AI agents, over MCP."

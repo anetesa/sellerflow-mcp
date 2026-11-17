@@ -25,3 +25,25 @@ committed config therefore cannot point a test setup at real orders and legally 
 The SDK provides stdio and Streamable HTTP server transports (`StdioServerTransport`,
 `Application.mcpStreamableHttp`), so the project stays on Kotlin. The in-memory `ChannelTransport` used in
 tests is marked `@ExperimentalMcpApi`; it is opted into in test code only.
+
+## A4. Allegro requires the app's User-Agent (Phase 1)
+
+The developer portal warns that API calls without a compliant User-Agent get the API key blocked. The format its
+generator produces is `Name/version (+https://where-the-app-is-described)`. `AllegroHttp` refuses to exist without
+`SELLERFLOW_ALLEGRO_USER_AGENT` in that format and sets the header on every request, OAuth included. Verified
+against the sandbox on 2026-11-17: client credentials and the device flow both answered 200 with it.
+
+## A5. Reading checkout forms (Phase 1)
+
+Taken from the "Jak obsługiwać zamówienia" tutorial; the sandbox had no orders to check them against yet.
+
+- A checkout form has no creation time. The order time is the earliest `lineItems[].boughtAt`, falling back to
+  `updatedAt`.
+- An order is ready to ship when `status` is `READY_FOR_PROCESSING` and `fulfillment.status` is not one of `SENT`,
+  `READY_FOR_PICKUP`, `PICKED_UP` or `RETURNED`.
+- The delivery method is recognised by its name: "InPost" or "Paczkomat" with a pickup point is a locker, without
+  one a courier. Allegro also has method ids; switch to them once real InPost method ids are seen in the sandbox.
+- The buyer's NIP is `invoice.address.company.taxId`. A NIP that fails its checksum is dropped, so the invoice step
+  asks the seller instead of issuing a wrong invoice.
+
+Check all four on the first sandbox order and update this entry.

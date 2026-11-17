@@ -1,0 +1,51 @@
+{
+  "checkoutForms": [
+    {
+      "id": "ffc396b0-9584-11e8-8d53-07c966f77738",
+      "buyer": {
+        "id": "1424041", "email": "buyer@example.com", "login": "example_login", "firstName": "Tomasz",
+        "lastName": "Nowak", "companyName": null, "guest": false, "phoneNumber": "+48 11 1111111"
+      },
+      "payment": { "id": "p1", "type": "ONLINE", "finishedAt": "2026-11-16T12:58:58.609Z", "paidAmount": { "amount": "167.87", "currency": "PLN" } },
+      "status": "READY_FOR_PROCESSING",
+      "fulfillment": { "status": "NEW" },
+      "delivery": {
+        "address": { "firstName": "Tomasz", "lastName": "Nowak", "street": "Bułgarska 69", "city": "Poznań", "zipCode": "60-320", "countryCode": "PL" },
+        "method": { "id": "m1", "name": "Allegro Paczkomaty InPost" },
+        "pickupPoint": { "id": "POZ08A", "name": "Paczkomat POZ08A", "address": { "street": "Przybyszewskiego 39A", "zipCode": "61-166", "city": "Poznań", "countryCode": "PL" } },
+        "cost": { "amount": "15.87", "currency": "PLN" },
+        "smart": false
+      },
+      "invoice": {
+        "required": true,
+        "address": {
+          "street": "Grunwaldzka 166", "city": "Poznań", "zipCode": "60-166", "countryCode": "PL",
+          "company": { "name": "Allegro", "taxId": "PL 525-267-47-98" }, "naturalPerson": null
+        }
+      },
+      "lineItems": [
+        {
+          "id": "li1", "offer": { "id": "6205584023", "name": "Adapter ELM327", "external": null },
+          "quantity": 2, "originalPrice": { "amount": "76.00", "currency": "PLN" }, "price": { "amount": "76.00", "currency": "PLN" },
+          "boughtAt": "2026-11-16T12:18:33.434Z"
+        }
+      ],
+      "summary": { "totalToPay": { "amount": "167.87", "currency": "PLN" } },
+      "updatedAt": "2026-11-16T12:20:00.000Z",
+      "revision": "dc0f896f"
+    },
+    {
+      "id": "aa11",
+      "buyer": { "login": "courier_buyer" },
+      "status": "READY_FOR_PROCESSING",
+      "fulfillment": { "status": "PROCESSING" },
+      "delivery": { "method": { "name": "Allegro Kurier DPD" }, "address": { "street": "Długa 1", "city": "Kraków", "zipCode": "31-001", "countryCode": "PL" } },
+      "invoice": { "required": false },
+      "lineItems": [ { "offer": { "id": "1", "name": "Kabel" }, "quantity": 1, "price": { "amount": "9.99", "currency": "PLN" } } ],
+      "summary": { "totalToPay": { "amount": "24.98", "currency": "PLN" } },
+      "updatedAt": "2026-11-16T15:00:00.000Z"
+    }
+  ],
+  "count": 2,
+  "totalCount": 2
+}

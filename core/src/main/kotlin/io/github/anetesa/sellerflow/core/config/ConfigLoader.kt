@@ -30,7 +30,11 @@ class ConfigLoader(
             SellerFlowConfig(
                 environment = environment,
                 dataDir = expandHome(env(DATA_DIR) ?: file.dataDir ?: DEFAULT_DATA_DIR),
-                allegro = AllegroSettings(clientId = env(ALLEGRO_CLIENT_ID) ?: file.allegro.clientId),
+                allegro =
+                    AllegroSettings(
+                        clientId = env(ALLEGRO_CLIENT_ID) ?: file.allegro.clientId,
+                        userAgent = env(ALLEGRO_USER_AGENT) ?: file.allegro.userAgent,
+                    ),
                 inpost = InpostSettings(organizationId = env(INPOST_ORGANIZATION_ID) ?: file.inpost.organizationId),
             )
         }
@@ -77,6 +81,7 @@ class ConfigLoader(
     @Serializable
     private data class AllegroSection(
         @SerialName("client_id") val clientId: String? = null,
+        @SerialName("user_agent") val userAgent: String? = null,
     )
 
     @Serializable
@@ -89,6 +94,7 @@ class ConfigLoader(
         const val CONFIG = "SELLERFLOW_CONFIG"
         const val DATA_DIR = "SELLERFLOW_DATA_DIR"
         const val ALLEGRO_CLIENT_ID = "SELLERFLOW_ALLEGRO_CLIENT_ID"
+        const val ALLEGRO_USER_AGENT = "SELLERFLOW_ALLEGRO_USER_AGENT"
         const val INPOST_ORGANIZATION_ID = "SELLERFLOW_INPOST_ORGANIZATION_ID"
         private const val DEFAULT_FILE = "sellerflow.toml"
         private const val DEFAULT_DATA_DIR = "~/.sellerflow"

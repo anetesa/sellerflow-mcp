@@ -9,6 +9,9 @@ data_dir = "~/.sellerflow"
 [allegro]
 # Client id of your app registered at apps.developer.allegro.pl (sandbox: apps.developer.allegro.pl.allegrosandbox.pl)
 client_id = ""
+# User-Agent generated for the app on the developer portal (Generator i Walidator User-Agent). Required:
+# Allegro blocks the API key of an app that calls without it. Example: "SellerFlow/1.0 (+https://github.com/you/repo)"
+user_agent = ""
 
 [inpost]
 # ShipX organization id from the InPost parcel manager, API section

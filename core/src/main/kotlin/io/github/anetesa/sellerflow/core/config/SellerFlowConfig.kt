@@ -19,6 +19,11 @@ data class SellerFlowConfig(
 data class AllegroSettings(
     /** The client id of the app registered on developer.allegro.pl; not a secret. */
     val clientId: String?,
+    /**
+     * The User-Agent Allegro generated for the app, e.g. `SellerFlow/1.0 (+https://github.com/anetesa/sellerflow-mcp)`.
+     * Allegro blocks the API key of an app that calls without it, so no request is sent while it is missing.
+     */
+    val userAgent: String? = null,
 )
 
 data class InpostSettings(

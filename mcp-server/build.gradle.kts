@@ -12,6 +12,9 @@ application {
 dependencies {
     implementation(project(":core"))
     implementation(project(":workflow"))
+    implementation(project(":allegro"))
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
     implementation(libs.mcp.server)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.clikt)

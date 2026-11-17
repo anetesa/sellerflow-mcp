@@ -30,6 +30,7 @@ class ConfigLoaderTest :
 
                 [allegro]
                 client_id = "from-file"
+                user_agent = "SellerFlow/1.0 (+https://example.com)"
 
                 [inpost]
                 organization_id = "123"
@@ -41,6 +42,7 @@ class ConfigLoaderTest :
                     .shouldBeInstanceOf<Outcome.Ok<SellerFlowConfig>>()
                     .value
             config.allegro.clientId shouldBe "from-env"
+            config.allegro.userAgent shouldBe "SellerFlow/1.0 (+https://example.com)"
             config.inpost.organizationId shouldBe "123"
             config.dataDir shouldBe dir.toPath().resolve("sf")
         }

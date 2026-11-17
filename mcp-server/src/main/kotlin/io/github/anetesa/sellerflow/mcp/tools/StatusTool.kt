@@ -31,7 +31,14 @@ internal fun statusText(config: SellerFlowConfig): String =
                 Environment.PROD -> "Environment: PRODUCTION (real orders, real shipments, legally binding invoices)"
             },
         )
-        appendLine("Allegro: " + if (config.allegro.clientId != null) "client id set" else "not configured")
+        appendLine(
+            "Allegro: " +
+                when {
+                    config.allegro.clientId == null -> "not configured"
+                    config.allegro.userAgent == null -> "client id set, User-Agent missing (no requests are sent without it)"
+                    else -> "client id and User-Agent set"
+                },
+        )
         appendLine("InPost: " + if (config.inpost.organizationId != null) "organization id set" else "not configured")
         append("KSeF: not available yet")
     }
