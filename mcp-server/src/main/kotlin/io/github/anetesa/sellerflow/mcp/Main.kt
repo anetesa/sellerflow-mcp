@@ -6,9 +6,12 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.core.subcommands
 import io.github.anetesa.sellerflow.core.Outcome
 import io.github.anetesa.sellerflow.core.config.ConfigLoader
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import io.ktor.utils.io.streams.asInput
 import io.modelcontextprotocol.kotlin.sdk.server.StdioServerTransport
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asSink
 import kotlinx.io.buffered
@@ -36,13 +39,18 @@ private class Serve : CliktCommand(name = "serve") {
                     exitProcess(1)
                 }
             }
-        val server = SellerFlowServer.create(config)
+        val client = HttpClient(CIO)
         val transport = StdioServerTransport(System.`in`.asInput(), System.out.asSink().buffered()) {}
         runBlocking {
+            val (allegro, allegroProblem) = Wiring(config, client).allegroTools(this)
+            val server = SellerFlowServer.create(config, allegro, allegroProblem)
             val session = server.createSession(transport)
             val closed = CompletableDeferred<Unit>()
             session.onClose { closed.complete(Unit) }
             closed.await()
+            client.close()
+            // Background logins still waiting for approval end with the session
+            coroutineContext.cancelChildren()
         }
     }
 }

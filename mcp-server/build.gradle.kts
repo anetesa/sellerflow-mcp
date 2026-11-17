@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":workflow"))
     implementation(project(":allegro"))
+    implementation(project(":storage"))
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.mcp.server)
@@ -21,6 +22,7 @@ dependencies {
     // stdio carries the MCP protocol on stdout: logs must go to stderr, which slf4j-simple does by default
     runtimeOnly(libs.slf4j.simple)
     testImplementation(libs.mcp.client)
+    testImplementation(libs.ktor.client.mock)
     testImplementation(libs.mcp.testing)
     testImplementation(libs.kotest.runner)
     testImplementation(libs.kotest.assertions)

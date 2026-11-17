@@ -1,6 +1,8 @@
 package io.github.anetesa.sellerflow.mcp
 
 import io.github.anetesa.sellerflow.core.config.SellerFlowConfig
+import io.github.anetesa.sellerflow.mcp.tools.AllegroTools
+import io.github.anetesa.sellerflow.mcp.tools.registerAllegroTools
 import io.github.anetesa.sellerflow.mcp.tools.registerStatusTool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
@@ -20,12 +22,21 @@ object SellerFlowServer {
         dry_run=false and that token only after they agree. Call sellerflow_status first if unsure what is configured.
         """.trimIndent()
 
-    fun create(config: SellerFlowConfig): Server =
+    /**
+     * [allegro] is null when Allegro is not set up; its tools then answer with [allegroProblem], which says what is
+     * missing, so the agent can tell the seller instead of guessing.
+     */
+    fun create(
+        config: SellerFlowConfig,
+        allegro: AllegroTools? = null,
+        allegroProblem: String = "Allegro is not set up.",
+    ): Server =
         Server(
             serverInfo = Implementation(name = NAME, version = VERSION, title = "SellerFlow"),
             options = ServerOptions(capabilities = ServerCapabilities(tools = ServerCapabilities.Tools(listChanged = false))),
             instructions = INSTRUCTIONS,
         ) {
             registerStatusTool(config)
+            registerAllegroTools(allegro, allegroProblem)
         }
 }

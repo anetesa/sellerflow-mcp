@@ -11,8 +11,16 @@ fulfillment cycle of a Polish online seller:
 > invoices in KSeF for the buyers who asked for one."
 
 > **Status: early development.** Phase 0 (project skeleton) is done. Phase 1 (Allegro) is in progress: login with
-> the device flow and reading orders work against the sandbox. InPost and KSeF follow. Sandbox environments are the
-> default.
+> the device flow, an encrypted saved login and reading orders work against the sandbox. InPost and KSeF follow.
+> Sandbox environments are the default.
+
+## Tools
+
+| Tool | What it does |
+|---|---|
+| `sellerflow_status` | Environment (sandbox or production) and which services are configured. Read-only. |
+| `allegro_login` | Connects the seller's Allegro account: returns a link to approve, then confirms the login. |
+| `allegro_list_orders` | Paid orders not sent yet: buyer, items, total, InPost locker, invoice data with a checked NIP. Read-only. |
 
 ## Safety model
 
@@ -40,8 +48,11 @@ npx @modelcontextprotocol/inspector --cli mcp-server/build/install/sellerflow/bi
 
 Configuration: copy `sellerflow.example.toml` to `sellerflow.toml`; secrets go to environment variables.
 
-Log in to Allegro and list the orders waiting for shipment (needs `SELLERFLOW_ALLEGRO_CLIENT_ID`,
-`SELLERFLOW_ALLEGRO_CLIENT_SECRET` and `SELLERFLOW_ALLEGRO_USER_AGENT`; tokens are kept in memory for now):
+Allegro needs `SELLERFLOW_ALLEGRO_CLIENT_ID`, `SELLERFLOW_ALLEGRO_CLIENT_SECRET` and `SELLERFLOW_ALLEGRO_USER_AGENT`
+(generated for your app on the developer portal; Allegro blocks the key of an app that calls without it). Set
+`SELLERFLOW_STORE_KEY` (e.g. `openssl rand -base64 32`) to keep the login between runs in `~/.sellerflow/sellerflow.db`,
+encrypted with AES-256-GCM and readable by the owner only. Log in and list the orders waiting for shipment from the
+terminal:
 
 ```bash
 mcp-server/build/install/sellerflow/bin/sellerflow allegro-login
