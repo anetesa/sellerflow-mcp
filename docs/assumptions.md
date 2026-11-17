@@ -47,3 +47,20 @@ Taken from the "Jak obsługiwać zamówienia" tutorial; the sandbox had no order
   asks the seller instead of issuing a wrong invoice.
 
 Check all four on the first sandbox order and update this entry.
+
+## A6. InPost ShipX, as seen in the sandbox (Phase 2)
+
+Checked against the sandbox on 2026-11-17 (organization 7281, locker KRA010):
+
+- `POST /v1/organizations/{id}/shipments` answers at once with status `created` and no tracking number; ShipX then
+  prepares offers and buys one in the background.
+- On a prepaid account with no funds the purchase fails: the shipment stays `offer_selected` and `transactions`
+  holds `{"status":"failure","details":{"error":"debt_collection"}}`. The label endpoint then answers 400
+  `invalid_action` / `shipment_status_incorrect`, and so does cancelling. SellerFlow reports this as "the InPost
+  account has no funds".
+- `GET /v1/points/{name}` works on the ShipX host without the token. An unknown name answers HTTP 200 with
+  `{"status":404,"error":"resource_not_found"}`, so the body, not the status code, decides.
+- The sandbox has its own lockers (KRA010 exists there, KRA010M does not), so production locker names from Allegro
+  orders may not exist in the sandbox.
+- The label is `GET /v1/shipments/{id}/label?format=Pdf&type=A6` (or `normal` for A4); not yet seen succeeding,
+  because the sandbox account has no funds. Verify it once the account is topped up or switched to invoice billing.
