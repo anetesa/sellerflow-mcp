@@ -5,13 +5,18 @@ import io.github.anetesa.sellerflow.core.SellerFlowError
 import io.github.anetesa.sellerflow.core.model.DeliveryMethod
 import io.github.anetesa.sellerflow.core.model.Money
 import io.github.anetesa.sellerflow.core.model.Order
+import io.github.anetesa.sellerflow.core.model.OrderId
 import io.github.anetesa.sellerflow.core.model.OrderStatus
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import java.time.Instant
 
 private val FIXTURE = AllegroOrdersTest::class.java.getResource("/checkout-forms.json")!!.readText()
@@ -40,6 +45,7 @@ class AllegroOrdersTest :
             order.lines.single().total shouldBe Money.parse("152.00", "PLN")
             order.total shouldBe Money.parse("167.87", "PLN")
             order.buyer.email shouldBe "buyer@example.com"
+            order.delivery.recipient?.lastName shouldBe "Nowak"
             val invoice = order.invoiceRequest!!
             invoice.name shouldBe "Allegro"
             invoice.nip?.value shouldBe "5252674798"
@@ -71,6 +77,36 @@ class AllegroOrdersTest :
             orders shouldHaveSize 150
             allegro.requests.map { it.url.parameters["offset"] } shouldBe listOf("0", "100")
             (AllegroOrders(allegro.http) { Outcome.Ok("t") }.list(OrderQuery(max = 30)) as Outcome.Ok).value shouldHaveSize 30
+        }
+
+        test("gets one order by id, and says so when it does not exist") {
+            val single =
+                Json
+                    .parseToJsonElement(FIXTURE)
+                    .jsonObject["checkoutForms"]!!
+                    .jsonArray[0]
+                    .toString()
+            val allegro =
+                FakeAllegro { request ->
+                    if (request.url.encodedPath.endsWith("/not-an-id")) {
+                        json(
+                            """{"errors":[{"code":"VALIDATION_ERROR","userMessage":"Not valid time UUID"}]}""",
+                            HttpStatusCode.UnprocessableEntity,
+                        )
+                    } else if (request.url.encodedPath.endsWith("/missing")) {
+                        json("""{"errors":[{"code":"NotFoundException"}]}""", HttpStatusCode.NotFound)
+                    } else {
+                        json(single)
+                    }
+                }
+            val orders = AllegroOrders(allegro.http) { Outcome.Ok("t") }
+            val order = orders.get(OrderId("ffc396b0-9584-11e8-8d53-07c966f77738")).shouldBeInstanceOf<Outcome.Ok<Order>>().value
+            order.delivery.recipient?.phone shouldBe "500600700"
+            orders
+                .get(OrderId("missing"))
+                .shouldBeInstanceOf<Outcome.Err>()
+                .error.message shouldContain "no order"
+            allegro.requests.map { it.url.encodedPath }.last() shouldBe "/order/checkout-forms/missing"
         }
 
         test("an expired token is an auth problem, not a crash") {

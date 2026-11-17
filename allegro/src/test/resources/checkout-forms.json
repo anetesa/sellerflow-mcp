@@ -10,7 +10,7 @@
       "status": "READY_FOR_PROCESSING",
       "fulfillment": { "status": "NEW" },
       "delivery": {
-        "address": { "firstName": "Tomasz", "lastName": "Nowak", "street": "Bułgarska 69", "city": "Poznań", "zipCode": "60-320", "countryCode": "PL" },
+        "address": { "firstName": "Tomasz", "lastName": "Nowak", "street": "Bułgarska 69", "city": "Poznań", "zipCode": "60-320", "countryCode": "PL", "phoneNumber": "500600700" },
         "method": { "id": "m1", "name": "Allegro Paczkomaty InPost" },
         "pickupPoint": { "id": "POZ08A", "name": "Paczkomat POZ08A", "address": { "street": "Przybyszewskiego 39A", "zipCode": "61-166", "city": "Poznań", "countryCode": "PL" } },
         "cost": { "amount": "15.87", "currency": "PLN" },

@@ -2,7 +2,9 @@ package io.github.anetesa.sellerflow.mcp
 
 import io.github.anetesa.sellerflow.core.config.SellerFlowConfig
 import io.github.anetesa.sellerflow.mcp.tools.AllegroTools
+import io.github.anetesa.sellerflow.mcp.tools.InpostTools
 import io.github.anetesa.sellerflow.mcp.tools.registerAllegroTools
+import io.github.anetesa.sellerflow.mcp.tools.registerInpostTools
 import io.github.anetesa.sellerflow.mcp.tools.registerStatusTool
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
@@ -30,6 +32,8 @@ object SellerFlowServer {
         config: SellerFlowConfig,
         allegro: AllegroTools? = null,
         allegroProblem: String = "Allegro is not set up.",
+        inpost: InpostTools? = null,
+        inpostProblem: String = "InPost is not set up.",
     ): Server =
         Server(
             serverInfo = Implementation(name = NAME, version = VERSION, title = "SellerFlow"),
@@ -38,5 +42,6 @@ object SellerFlowServer {
         ) {
             registerStatusTool(config)
             registerAllegroTools(allegro, allegroProblem)
+            registerInpostTools(inpost, inpostProblem)
         }
 }

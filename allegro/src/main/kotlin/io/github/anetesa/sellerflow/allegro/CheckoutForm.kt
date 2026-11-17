@@ -66,6 +66,9 @@ internal data class PickupPointDto(
 
 @Serializable
 internal data class DeliveryAddressDto(
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val phoneNumber: String? = null,
     val street: String? = null,
     val city: String? = null,
     val zipCode: String? = null,

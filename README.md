@@ -10,9 +10,9 @@ fulfillment cycle of a Polish online seller:
 > "Process yesterday's paid Allegro orders: create InPost locker shipments, give me the labels, and issue
 > invoices in KSeF for the buyers who asked for one."
 
-> **Status: early development.** Phase 0 (project skeleton) is done. Phase 1 (Allegro) is in progress: login with
-> the device flow, an encrypted saved login and reading orders work against the sandbox. InPost and KSeF follow.
-> Sandbox environments are the default.
+> **Status: early development.** Phase 0 (project skeleton) is done. Allegro (device-flow login, encrypted saved
+> login, orders) and InPost (lockers, locker shipments with confirmation, labels) work against their sandboxes.
+> KSeF invoices follow. Sandbox environments are the default.
 
 ## Tools
 
@@ -21,6 +21,9 @@ fulfillment cycle of a Polish online seller:
 | `sellerflow_status` | Environment (sandbox or production) and which services are configured. Read-only. |
 | `allegro_login` | Connects the seller's Allegro account: returns a link to approve, then confirms the login. |
 | `allegro_list_orders` | Paid orders not sent yet: buyer, items, total, InPost locker, invoice data with a checked NIP. Read-only. |
+| `inpost_find_locker` | An InPost locker by name: operating or not, address, where it is. Read-only. |
+| `inpost_create_shipment` | Ships an Allegro order to the buyer's locker. Preview and `confirm_token` first (`dry_run=true`, the default); the real shipment only with that token; never two shipments for one order. |
+| `inpost_get_label` | Saves the A6 (or A4) PDF label of a confirmed shipment to `~/.sellerflow/labels` and returns the path. |
 
 ## Safety model
 

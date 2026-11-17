@@ -9,8 +9,13 @@ import io.github.anetesa.sellerflow.core.config.Secrets
 import io.github.anetesa.sellerflow.core.config.SellerFlowConfig
 import io.github.anetesa.sellerflow.core.store.CredentialStore
 import io.github.anetesa.sellerflow.core.store.InMemoryCredentialStore
+import io.github.anetesa.sellerflow.inpost.InpostHttp
+import io.github.anetesa.sellerflow.inpost.InpostShipments
+import io.github.anetesa.sellerflow.mcp.confirm.ConfirmTokens
 import io.github.anetesa.sellerflow.mcp.tools.AllegroTools
+import io.github.anetesa.sellerflow.mcp.tools.InpostTools
 import io.github.anetesa.sellerflow.storage.SqliteCredentialStore
+import io.github.anetesa.sellerflow.storage.SqliteShipmentLedger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 
@@ -46,6 +51,14 @@ internal class Wiring(
 
     fun allegroSession(http: AllegroHttp) = AllegroSession(AllegroAuth(http), store)
 
+    /** The seller's orders, when Allegro is set up. */
+    private val allegroOrders: AllegroOrders? by lazy {
+        (allegroHttp() as? Outcome.Ok)?.value?.let { http ->
+            val session = allegroSession(http)
+            AllegroOrders(http) { session.accessToken() }
+        }
+    }
+
     /** The Allegro tools, or the reason they cannot work. */
     fun allegroTools(scope: CoroutineScope): Pair<AllegroTools?, String> =
         when (val http = allegroHttp()) {
@@ -54,5 +67,22 @@ internal class Wiring(
                 val session = allegroSession(http.value)
                 AllegroTools(AllegroAuth(http.value), session, AllegroOrders(http.value) { session.accessToken() }, scope) to ""
             }
+        }
+
+    /** The InPost tools, or the reason they cannot work. Shipments are recorded per order in the local database. */
+    fun inpostTools(): Pair<InpostTools?, String> =
+        when (
+            val http =
+                InpostHttp.create(client, config.endpoints.inpostApi, config.inpost.organizationId, secrets.inpostApiToken())
+        ) {
+            is Outcome.Err -> null to http.error.message
+            is Outcome.Ok ->
+                InpostTools(
+                    shipments = InpostShipments(http.value),
+                    orders = allegroOrders,
+                    ledger = SqliteShipmentLedger.open(config.dataDir.resolve("sellerflow.db")),
+                    tokens = ConfirmTokens(),
+                    labelsDir = config.dataDir.resolve("labels"),
+                ) to ""
         }
 }

@@ -1,13 +1,18 @@
 package io.github.anetesa.sellerflow.allegro
 
 import io.github.anetesa.sellerflow.core.Outcome
+import io.github.anetesa.sellerflow.core.SellerFlowError
 import io.github.anetesa.sellerflow.core.flatMap
+import io.github.anetesa.sellerflow.core.map
 import io.github.anetesa.sellerflow.core.model.Order
+import io.github.anetesa.sellerflow.core.model.OrderId
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.encodeURLPathPart
 
 /** Which orders to list. The default is what the seller has to ship: paid and not yet sent. */
 data class OrderQuery(
@@ -44,6 +49,27 @@ class AllegroOrders(
         }
         return Outcome.Ok(orders)
     }
+
+    /** One order by its Allegro id, whatever its status. */
+    suspend fun get(id: OrderId): Outcome<Order> =
+        accessToken()
+            .flatMap { token ->
+                http.send {
+                    method = HttpMethod.Get
+                    url("${http.endpoints.allegroApi}/order/checkout-forms/${id.value.encodeURLPathPart()}")
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Accept, PUBLIC_V1)
+                }
+            }.flatMap { response ->
+                // Allegro answers 404 for an unknown order and 422 ("Not valid time UUID") for something that is no order id
+                if (response.status == HttpStatusCode.NotFound || response.status == HttpStatusCode.UnprocessableEntity) {
+                    Outcome.Err(
+                        SellerFlowError.Invalid("Allegro has no order $id on this account (order ids look like 2f9a1c40-9584-11e8-…)."),
+                    )
+                } else {
+                    decode<CheckoutForm>(response).map { it.toOrder() }
+                }
+            }
 
     private suspend fun page(
         query: OrderQuery,

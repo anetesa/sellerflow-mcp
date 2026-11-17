@@ -201,7 +201,7 @@ class InpostShipments(
 private val HTTP_OK = 200..299
 
 /** `+48 500 600 700`, `0048500600700` or `500-600-700` → `500600700`; null when it is not a Polish 9-digit number. */
-internal fun polishMobile(raw: String): String? {
+fun polishMobile(raw: String): String? {
     val digits = raw.filter(Char::isDigit)
     val national =
         when {

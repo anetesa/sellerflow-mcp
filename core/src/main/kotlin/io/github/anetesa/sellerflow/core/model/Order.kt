@@ -66,6 +66,15 @@ data class Delivery(
     /** InPost locker the buyer chose, e.g. "KRA010M"; only for [DeliveryMethod.INPOST_LOCKER]. */
     val pickupPointId: String?,
     val address: Address?,
+    /** Who receives the parcel; the marketplace may give a different person than the buyer. */
+    val recipient: Recipient? = null,
+)
+
+/** The person the carrier contacts: InPost texts the locker code to [phone]. */
+data class Recipient(
+    val firstName: String?,
+    val lastName: String?,
+    val phone: String?,
 )
 
 enum class DeliveryMethod {

@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":workflow"))
     implementation(project(":allegro"))
     implementation(project(":storage"))
+    implementation(project(":inpost"))
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.mcp.server)

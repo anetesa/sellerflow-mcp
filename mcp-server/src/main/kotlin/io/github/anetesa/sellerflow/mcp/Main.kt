@@ -42,8 +42,10 @@ private class Serve : CliktCommand(name = "serve") {
         val client = HttpClient(CIO)
         val transport = StdioServerTransport(System.`in`.asInput(), System.out.asSink().buffered()) {}
         runBlocking {
-            val (allegro, allegroProblem) = Wiring(config, client).allegroTools(this)
-            val server = SellerFlowServer.create(config, allegro, allegroProblem)
+            val wiring = Wiring(config, client)
+            val (allegro, allegroProblem) = wiring.allegroTools(this)
+            val (inpost, inpostProblem) = wiring.inpostTools()
+            val server = SellerFlowServer.create(config, allegro, allegroProblem, inpost, inpostProblem)
             val session = server.createSession(transport)
             val closed = CompletableDeferred<Unit>()
             session.onClose { closed.complete(Unit) }

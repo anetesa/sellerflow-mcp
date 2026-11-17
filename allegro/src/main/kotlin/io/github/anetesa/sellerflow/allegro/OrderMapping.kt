@@ -11,6 +11,7 @@ import io.github.anetesa.sellerflow.core.model.Order
 import io.github.anetesa.sellerflow.core.model.OrderId
 import io.github.anetesa.sellerflow.core.model.OrderLine
 import io.github.anetesa.sellerflow.core.model.OrderStatus
+import io.github.anetesa.sellerflow.core.model.Recipient
 import java.time.Instant
 
 /** Allegro's checkout form as a marketplace-independent [Order]. */
@@ -58,6 +59,7 @@ private fun DeliveryDto?.toDelivery(): Delivery {
         methodName = name,
         pickupPointId = this?.pickupPoint?.id?.takeIf { method == DeliveryMethod.INPOST_LOCKER },
         address = this?.address?.run { address(street, zipCode, city, countryCode) },
+        recipient = this?.address?.run { Recipient(firstName, lastName, phoneNumber) },
     )
 }
 
