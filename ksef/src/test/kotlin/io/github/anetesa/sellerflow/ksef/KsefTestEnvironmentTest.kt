@@ -74,7 +74,7 @@ class KsefTestEnvironmentTest :
 
             System.getenv("SELLERFLOW_KSEF_BOOTSTRAP_OUT")?.let { path ->
                 File(path).apply {
-                    writeText("SELLERFLOW_KSEF_NIP=${nip.value}\nSELLERFLOW_KSEF_TOKEN=$ksefToken\n")
+                    writeText("SELLERFLOW_KSEF_NIP='${nip.value}'\nSELLERFLOW_KSEF_TOKEN='$ksefToken'\n")
                     setReadable(false, false)
                     setReadable(true, true)
                     setWritable(false, false)

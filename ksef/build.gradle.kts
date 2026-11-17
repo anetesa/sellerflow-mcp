@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.serialization.json)
+    testImplementation(project(":invoice"))
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.ktor.client.cio)
     testImplementation(libs.kotest.runner)

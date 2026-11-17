@@ -95,3 +95,16 @@ checked against KSeF TEST on 2026-11-17:
 - A buyer with a valid NIP is identified by it; a private person (or a NIP that fails its checksum) by `BrakID`.
   `P_6`, the date of sale, is the order's date in Europe/Warsaw. JST and GV are always "2" (not a local government
   unit, not a VAT group member).
+
+## A9. Sending invoices to KSeF (Phase 3)
+
+From `sesja-interaktywna.md`, `faktury/weryfikacja-faktury.md` and `open-api.json`; an FA(3) invoice from
+Fa3InvoiceBuilder was accepted by KSeF TEST on 2026-11-17 (KSeF number assigned, UPO returned):
+
+- One interactive session per issue: a fresh 32-byte AES key and 16-byte IV, the key encrypted with RSA-OAEP
+  (SHA-256) under the `SymmetricKeyEncryption` key, `formCode` FA (3) / 1-0E / FA. The session is always closed.
+- The invoice is sent AES-256-CBC with PKCS#7 padding, with SHA-256 (Base64) and sizes of the plain and the
+  encrypted file.
+- `GET /sessions/{ref}/invoices/{invoiceRef}` answers 100/150 while processing, 200 with the KSeF number, 440 for a
+  duplicate (with `originalKsefNumber`), other 4xx/5xx with the reason. The UPO is `GET …/upo` (application/xml).
+- A KSeF token contains `|`, so env files quote it.
